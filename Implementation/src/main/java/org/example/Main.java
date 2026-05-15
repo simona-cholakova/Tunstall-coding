@@ -21,8 +21,6 @@ public class Main {
 
         String bigBoy = "dddcdddcddddddcdcdcdddddaddddddcddddddddddcddcccddddddddddddddcddddddbdaaddddddddddbdcddddddbdcdbbadcdddaddddddbddddddcdddcdddddddddddddddcddddddbddcdddddabbcdddddbdcdddddddcddcddbddddddddddbdddcddddbdcdddddddcddddadddddddccdddcdddccdcdddddddcddddbdbdbdddddddcddddddddddddddcdbdbbdcddbddbddacddbdddadddddddacbddddddbdbdcadddaddcdddddddddccdddddbdddccdddcddddcddcacdcdbcdddcdbddddddaaddbadccddbddddbdddddddcddddcddaddddbdaddddddadbddddddddcdcddbddcddddddcddcdccdddbddddbddccddddcddddbdadddbddcdddbdddddddbdddbdbcddcddddddddddddddddaddddddddddcddbcdbdddddddddcdbddddccdddcdaddbbadcdddddaddddddddddddddddbddddcddbdddcbbdcbbddddddcdcdcddddddcdddddddcdcdbdddddddddadddddbdddddcddddbcbcaddddddddddcddcdccbddaddcadddddbdddddcdbdadddddddcdddddddcdcdccdbddddcddcbddcdddddddadbddddadddddddddddddddcddcdddcddaddcdddddbbddcddddddcddddcdddcdcdddbddabddddcbbddbdddddddadcdbdbdccddddcbdddddddddddddddaddddcdddddddddddbdcbddcadbcdbccdcddddddddccddddddbddbcddcdddddddadbddddbcaddddacaddcddddcddddbddddbccccddddcdddcdd";
 
-        System.out.printf(bigBoy);
-
         //initialise the character distribution
         ArrayList <Pair> initial = new ArrayList<>();
         initial.add(new Pair("d",BigDecimal.valueOf(0.7)));
@@ -69,6 +67,10 @@ public class Main {
         }
         lenOfBiggestCodeWord=tempBiggestCodeword;
 
+        System.out.println();
+        System.out.println("Base Message");
+        System.out.printf(bigBoy);
+
         //ENCODE ----------------------------------------------------------------------------------------
         String encodedNum="";
         String encodedBin="";
@@ -95,9 +97,10 @@ public class Main {
             } else {
                 letter--;           //goes to negative which implies that codeword for the test doesn't exist
                 if (letter < 0) {   //this can only happen at the end so code from !dirty.isEmpty() could go here but it would fire 2ce so call break
-                    dirty = dirty + test;
-                    count++;
-                    letter = 5;
+                    System.out.println("\n There is a dirty bit - letters that dont have a code... Encoding it with "+highestProbPair.key);
+                    encodedNum = encodedNum + encode.get(highestProbPair.key);
+                    encodedBin = encodedBin + String.format("%4s", Integer.toBinaryString(encode.get(highestProbPair.key))).replace(' ', '0');
+                    stop=true;
                 }
             }
             if (count >= bigBoy.length()) {
@@ -105,12 +108,7 @@ public class Main {
             }
         }
 
-        if (!dirty.isEmpty()){
-            System.out.println("There is a dirty bit - letters that dont have a code... Encoding it with "+highestProbPair.key);
-            encodedNum = encodedNum + encode.get(highestProbPair.key);
-            encodedBin = encodedBin + String.format("%4s", Integer.toBinaryString(encode.get(highestProbPair.key))).replace(' ', '0');
-        }
-
+        System.out.println();
         System.out.println("Encoded Message: ");
         System.out.println(encodedBin);
 
@@ -123,11 +121,13 @@ public class Main {
             decoded= decoded + decode.get(Integer.parseInt(decoding[j], 2));
         }
 
-        if (decoded.length() > bigBoy.length()) {
+        if (decoded.length() > bigBoy.length()) { //this means we had the dirty bit which was encoded with more letters
             decoded = decoded.substring(0, bigBoy.length());
         }
 
-        System.out.println("DECODED Messages : "+ decoded);
+        System.out.println();
+        System.out.println("Decoded Messages: ");
+        System.out.println(decoded);
 
         if (decoded.equals(bigBoy)){
             System.out.println("Decoding successful: TRUE");
