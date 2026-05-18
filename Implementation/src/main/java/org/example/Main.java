@@ -12,14 +12,30 @@ public class Main {
         HashMap<String, Integer> encode = new HashMap<>();
         HashMap<Integer, String> decode = new HashMap<>();
 
-        Random rand = new Random(42);
+        Random rand = new Random();
         final int lenOfBiggestCodeWord;
         Pair highestProbPair=null;
 
         int count = 0;
+        String bigBoy ="";
+
+        for (int i = 0; i < 1000; i++) {
+            int a = rand.nextInt(101);
+            if (a<70){
+                bigBoy = bigBoy.concat("d");
+            }else if (a<85){
+                bigBoy=bigBoy.concat("c");
+            }else if (a<95){
+                bigBoy=bigBoy.concat("b");
+            }else{
+                bigBoy=bigBoy.concat("a");
+            }
+        }
 
 
-        String bigBoy = "dddcdddcddddddcdcdcdddddaddddddcddddddddddcddcccddddddddddddddcddddddbdaaddddddddddbdcddddddbdcdbbadcdddaddddddbddddddcdddcdddddddddddddddcddddddbddcdddddabbcdddddbdcdddddddcddcddbddddddddddbdddcddddbdcdddddddcddddadddddddccdddcdddccdcdddddddcddddbdbdbdddddddcddddddddddddddcdbdbbdcddbddbddacddbdddadddddddacbddddddbdbdcadddaddcdddddddddccdddddbdddccdddcddddcddcacdcdbcdddcdbddddddaaddbadccddbddddbdddddddcddddcddaddddbdaddddddadbddddddddcdcddbddcddddddcddcdccdddbddddbddccddddcddddbdadddbddcdddbdddddddbdddbdbcddcddddddddddddddddaddddddddddcddbcdbdddddddddcdbddddccdddcdaddbbadcdddddaddddddddddddddddbddddcddbdddcbbdcbbddddddcdcdcddddddcdddddddcdcdbdddddddddadddddbdddddcddddbcbcaddddddddddcddcdccbddaddcadddddbdddddcdbdadddddddcdddddddcdcdccdbddddcddcbddcdddddddadbddddadddddddddddddddcddcdddcddaddcdddddbbddcddddddcddddcdddcdcdddbddabddddcbbddbdddddddadcdbdbdccddddcbdddddddddddddddaddddcdddddddddddbdcbddcadbcdbccdcddddddddccddddddbddbcddcdddddddadbddddbcaddddacaddcddddcddddbddddbccccddddcdddcdd";
+        System.out.println("\n================ GENERATED SOURCE SEQUENCE ================\n");
+        System.out.println(bigBoy);
+        System.out.println("\n Sequence length: "+bigBoy.length());
 
         //initialise the character distribution
         ArrayList <Pair> initial = new ArrayList<>();
@@ -46,12 +62,14 @@ public class Main {
             count++;
         }
 
-
         int i=0;
         int tempBiggestCodeword=0;
 
         BigDecimal temp = null;
         BigDecimal maxValue = null;
+        System.out.println("\n================ TUNSTALL DICTIONARY ================\n");
+        System.out.printf("%-8s %-12s %-20s %-15s%n", "Index", "Phrase", "Probability", "Codeword (binary)");
+        System.out.println("----------------------------------------------------");
         for (Pair p : codeBook) {
             if (tempBiggestCodeword<p.key.length()){ //save the longest codeword
                 tempBiggestCodeword=p.key.length();
@@ -62,14 +80,19 @@ public class Main {
             }
             encode.put(p.key, i); //actually keep the encoding
             decode.put(i, p.key); //and decoding
-            System.out.println("\n "+ i + " "+ p.key +"  "+p.value);
+
+            String binary = String.format("%4s", Integer.toBinaryString(i)).replace(' ', '0');  // ← same as encode loop
+
+            System.out.printf("%-8d %-12s %-20s %-15s%n",
+                                i,
+                                p.key,
+                                p.value,
+                                binary);
+
+            //System.out.println(i + "                "+ p.key +"               "+p.value);
             i++;
         }
         lenOfBiggestCodeWord=tempBiggestCodeword;
-
-        System.out.println();
-        System.out.println("Base Message");
-        System.out.printf(bigBoy);
 
         //ENCODE ----------------------------------------------------------------------------------------
         String encodedNum="";
@@ -97,7 +120,9 @@ public class Main {
             } else {
                 letter--;           //goes to negative which implies that codeword for the test doesn't exist
                 if (letter < 0) {   //this can only happen at the end so code from !dirty.isEmpty() could go here but it would fire 2ce so call break
-                    System.out.println("\n There is a dirty bit - letters that dont have a code... Encoding it with "+highestProbPair.key);
+
+                    dirty = bigBoy.substring(count);
+                    System.out.println("\n Phrase: \""+ dirty + "\" is not in the dictionary so we will be encoding it with highest probability phrase: " + highestProbPair.key);
                     encodedNum = encodedNum + encode.get(highestProbPair.key);
                     encodedBin = encodedBin + String.format("%4s", Integer.toBinaryString(encode.get(highestProbPair.key))).replace(' ', '0');
                     stop=true;
@@ -109,7 +134,7 @@ public class Main {
         }
 
         System.out.println();
-        System.out.println("Encoded Message: ");
+        System.out.println("================ ENCODED MESSAGE ================\n");
         System.out.println(encodedBin);
 
 
@@ -126,13 +151,129 @@ public class Main {
         }
 
         System.out.println();
-        System.out.println("Decoded Messages: ");
+        System.out.println("================ DECODED MESSAGE ================\n");
         System.out.println(decoded);
 
         if (decoded.equals(bigBoy)){
-            System.out.println("Decoding successful: TRUE");
+            System.out.println("\nDecoding successful: TRUE");
         }else {
             System.out.println("Decoding successful: FALSE");
         }
+
+
+
+
+
+
+
+//TUNSTALL STATISTICS ─────────────────────────────────────────────────────
+        double averagePhraseLength = 0.0;
+
+        for (Pair entry : codeBook) {                       // dictionary → codeBook
+            averagePhraseLength +=
+                    entry.value.doubleValue()               // getValue() → .value
+                            * entry.key.length();           // getKey()   → .key
+        }
+
+        double averageBitsPerSymbol = 4.0 / averagePhraseLength;
+
+
+
+        System.out.println("\n================ TUNSTALL STATISTICS ================\n");
+
+        System.out.printf("%-35s %.4f symbols%n",
+                "Average phrase length:",
+                averagePhraseLength);
+
+        System.out.printf("%-35s %.4f bits/symbol%n",
+                "Average encoded length:",
+                averageBitsPerSymbol);
+
+        double entropy = 0.0;
+
+        for (Pair e : initial) {                            // alphabetAndProbabilities → initial
+            double p = e.value.doubleValue();               // getValue() → .value
+            entropy -= p * (Math.log(p) / Math.log(2));
+        }
+
+        System.out.printf("%-35s %.4f bits/symbol%n",
+                "Source entropy:",
+                entropy);
+
+        System.out.printf("%-35s %.2f%%",
+                "Tunstall efficiency:",
+                (entropy / averageBitsPerSymbol) * 100);
+
+        System.out.println();
+
+        huffmanComparison(bigBoy);
+
+    }
+
+    public static void huffmanComparison(String sequence) {
+
+        // ── Huffman codes using YOUR structures ──────────────────────────────
+        HashMap<String, Integer> huffmanEncode = new HashMap<>();
+        HashMap<Integer, String> huffmanDecode = new HashMap<>();
+
+        // Manual Huffman tree for {d=0.70, c=0.15, b=0.10, a=0.05}
+        // d→0, c→10, b→110, a→111  (stored as bit-length; decode via lookup)
+        huffmanEncode.put("d",  0);   // code "0"    → index 0
+        huffmanEncode.put("c",  1);   // code "10"   → index 1
+        huffmanEncode.put("b",  2);   // code "110"  → index 2
+        huffmanEncode.put("a",  3);   // code "111"  → index 3
+
+        huffmanDecode.put(0, "0");    // actual bit-string stored in decode map
+        huffmanDecode.put(1, "10");
+        huffmanDecode.put(2, "110");
+        huffmanDecode.put(3, "111");
+
+        // ── Alphabet using YOUR Pair + ArrayList ─────────────────────────────
+        ArrayList<Pair> alphabetAndProbabilities = new ArrayList<>();
+        alphabetAndProbabilities.add(new Pair("d", BigDecimal.valueOf(0.70)));
+        alphabetAndProbabilities.add(new Pair("c", BigDecimal.valueOf(0.15)));
+        alphabetAndProbabilities.add(new Pair("b", BigDecimal.valueOf(0.10)));
+        alphabetAndProbabilities.add(new Pair("a", BigDecimal.valueOf(0.05)));
+
+        // ── Average code length ───────────────────────────────────────────────
+        double expectedLength = 0;
+        for (Pair p : alphabetAndProbabilities) {
+            // bit-string length = huffmanDecode.get( huffmanEncode.get(symbol) ).length()
+            int codeLen = huffmanDecode.get(huffmanEncode.get(p.key)).length();
+            expectedLength += p.value.doubleValue() * codeLen;
+        }
+
+        System.out.println("\n================ HUFFMAN COMPARISON ================\n");
+        System.out.printf("%-35s %.4f bits/symbol%n",
+                "Huffman average length:", expectedLength);
+
+        // ── Encoded bit count ─────────────────────────────────────────────────
+        int totalHuffBits = 0;
+        for (char ch : sequence.toCharArray()) {
+            Integer idx = huffmanEncode.get(String.valueOf(ch));
+            if (idx != null) {
+                totalHuffBits += huffmanDecode.get(idx).length();
+            }
+        }
+
+        double originalBits = sequence.length() * 8.0;
+        System.out.printf("%-35s %d bits%n",
+                "Huffman encoded length:", totalHuffBits);
+        System.out.printf("%-35s %.2f%%%n",
+                "Huffman compression vs ASCII:",
+                (1.0 - totalHuffBits / originalBits) * 100);
+
+        // ── Entropy ───────────────────────────────────────────────────────────
+        double entropy = 0;
+        for (Pair p : alphabetAndProbabilities) {
+            double prob = p.value.doubleValue();
+            entropy -= prob * (Math.log(prob) / Math.log(2));
+        }
+
+        System.out.printf("%-35s %.2f%%%n",
+                "Huffman efficiency:",
+                (entropy / expectedLength) * 100);
+
+        System.out.println("\n====================================================");
     }
 }
