@@ -62,15 +62,15 @@ public class Main {
             count++;
         }
 
-        int i=0;
         int tempBiggestCodeword=0;
-
         BigDecimal temp = null;
         BigDecimal maxValue = null;
         System.out.println("\n================ TUNSTALL DICTIONARY ================\n");
         System.out.printf("%-8s %-12s %-20s %-15s%n", "Index", "Phrase", "Probability", "Codeword (binary)");
         System.out.println("----------------------------------------------------");
-        for (Pair p : codeBook) {
+        for (int i=0; i<codeBook.size(); i++) {
+            Pair p = codeBook.get(i);
+
             if (tempBiggestCodeword<p.key.length()){ //save the longest codeword
                 tempBiggestCodeword=p.key.length();
             }
@@ -80,16 +80,12 @@ public class Main {
             }
             encode.put(p.key, i); //actually keep the encoding
             decode.put(i, p.key); //and decoding
-
             String binary = String.format("%4s", Integer.toBinaryString(i)).replace(' ', '0');  // ← same as encode loop
-
             System.out.printf("%-8d %-12s %-20s %-15s%n",
                                 i,
                                 p.key,
                                 p.value,
                                 binary);
-
-            //System.out.println(i + "                "+ p.key +"               "+p.value);
             i++;
         }
         lenOfBiggestCodeWord=tempBiggestCodeword;
@@ -161,33 +157,19 @@ public class Main {
         }
 
 
-
-
-
-
-
-//TUNSTALL STATISTICS ─────────────────────────────────────────────────────
+        //TUNSTALL STATISTICS ---------------------------------------------------------
         double averagePhraseLength = 0.0;
-
         for (Pair entry : codeBook) {                       // dictionary → codeBook
             averagePhraseLength +=
                     entry.value.doubleValue()               // getValue() → .value
                             * entry.key.length();           // getKey()   → .key
         }
-
         double averageBitsPerSymbol = 4.0 / averagePhraseLength;
-
-
 
         System.out.println("\n================ TUNSTALL STATISTICS ================\n");
 
-        System.out.printf("%-35s %.4f symbols%n",
-                "Average phrase length:",
-                averagePhraseLength);
-
-        System.out.printf("%-35s %.4f bits/symbol%n",
-                "Average encoded length:",
-                averageBitsPerSymbol);
+        System.out.printf("%-35s %.4f symbols%n", "Average phrase length:", averagePhraseLength);
+        System.out.printf("%-35s %.4f bits/symbol%n", "Average encoded length:", averageBitsPerSymbol);
 
         double entropy = 0.0;
 
@@ -195,24 +177,14 @@ public class Main {
             double p = e.value.doubleValue();               // getValue() → .value
             entropy -= p * (Math.log(p) / Math.log(2));
         }
-
-        System.out.printf("%-35s %.4f bits/symbol%n",
-                "Source entropy:",
-                entropy);
-
-        System.out.printf("%-35s %.2f%%",
-                "Tunstall efficiency:",
-                (entropy / averageBitsPerSymbol) * 100);
-
+        System.out.printf("%-35s %.4f bits/symbol%n", "Source entropy:", entropy);
+        System.out.printf("%-35s %.2f%%", "Tunstall efficiency:", (entropy / averageBitsPerSymbol) * 100);
         System.out.println();
-
         huffmanComparison(bigBoy);
-
     }
 
     public static void huffmanComparison(String sequence) {
-
-        // ── Huffman codes using YOUR structures ──────────────────────────────
+        // Huffman codes using YOUR structures ---------------------------------------------------------
         HashMap<String, Integer> huffmanEncode = new HashMap<>();
         HashMap<Integer, String> huffmanDecode = new HashMap<>();
 
@@ -228,14 +200,14 @@ public class Main {
         huffmanDecode.put(2, "110");
         huffmanDecode.put(3, "111");
 
-        // ── Alphabet using YOUR Pair + ArrayList ─────────────────────────────
+        // Alphabet using YOUR Pair + ArrayList ---------------------------------------------------------
         ArrayList<Pair> alphabetAndProbabilities = new ArrayList<>();
         alphabetAndProbabilities.add(new Pair("d", BigDecimal.valueOf(0.70)));
         alphabetAndProbabilities.add(new Pair("c", BigDecimal.valueOf(0.15)));
         alphabetAndProbabilities.add(new Pair("b", BigDecimal.valueOf(0.10)));
         alphabetAndProbabilities.add(new Pair("a", BigDecimal.valueOf(0.05)));
 
-        // ── Average code length ───────────────────────────────────────────────
+        //Average code length ---------------------------------------------------------
         double expectedLength = 0;
         for (Pair p : alphabetAndProbabilities) {
             // bit-string length = huffmanDecode.get( huffmanEncode.get(symbol) ).length()
@@ -247,7 +219,7 @@ public class Main {
         System.out.printf("%-35s %.4f bits/symbol%n",
                 "Huffman average length:", expectedLength);
 
-        // ── Encoded bit count ─────────────────────────────────────────────────
+        // Encoded bit count ---------------------------------------------------------
         int totalHuffBits = 0;
         for (char ch : sequence.toCharArray()) {
             Integer idx = huffmanEncode.get(String.valueOf(ch));
@@ -257,22 +229,17 @@ public class Main {
         }
 
         double originalBits = sequence.length() * 8.0;
-        System.out.printf("%-35s %d bits%n",
-                "Huffman encoded length:", totalHuffBits);
-        System.out.printf("%-35s %.2f%%%n",
-                "Huffman compression vs ASCII:",
-                (1.0 - totalHuffBits / originalBits) * 100);
+        System.out.printf("%-35s %d bits%n", "Huffman encoded length:", totalHuffBits);
+        System.out.printf("%-35s %.2f%%%n", "Huffman compression vs ASCII:", (1.0 - totalHuffBits / originalBits) * 100);
 
-        // ── Entropy ───────────────────────────────────────────────────────────
+        //Entropy ---------------------------------------------------------
         double entropy = 0;
         for (Pair p : alphabetAndProbabilities) {
             double prob = p.value.doubleValue();
             entropy -= prob * (Math.log(prob) / Math.log(2));
         }
 
-        System.out.printf("%-35s %.2f%%%n",
-                "Huffman efficiency:",
-                (entropy / expectedLength) * 100);
+        System.out.printf("%-35s %.2f%%%n", "Huffman efficiency:", (entropy / expectedLength) * 100);
 
         System.out.println("\n====================================================");
     }
